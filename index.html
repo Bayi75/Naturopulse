@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Naturopulse - Votre équilibre naturel</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & ReactDOM -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sage: '#8A9A5B',
+                        'sage-light': '#B2AC88',
+                        terracotta: '#C04000',
+                        'terracotta-light': '#E2725B',
+                        cream: '#F5F5F0',
+                    },
+                    fontFamily: {
+                        serif: ['Playfair Display', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #F5F5F0; color: #44403c; font-family: 'Inter', sans-serif; }
+        .font-serif { font-family: 'Playfair Display', serif; }
+        .animate-in { animation: fadeIn 0.6s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-hover { transition: all 0.3s ease; }
+        .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- Composant Icône ---
+        const Icon = ({ name, size = 24, className = "" }) => {
+            useEffect(() => { if (window.lucide) window.lucide.createIcons(); }, [name]);
+            return <i data-lucide={name} style={{ width: size, height: size }} className={className}></i>;
+        };
+
+        // --- Questionnaire (12 questions) ---
+        const QUESTIONS = [
+            { id: 1, text: "Votre morphologie est plutôt :", options: [
+                { text: "Ronde, souple, avec une tendance à la rétention", type: 'Lymphatique' },
+                { text: "Proportionnée, tonique, visage ouvert et coloré", type: 'Sanguin' },
+                { text: "Carrée, musclée, ossature solide et regard vif", type: 'Bilieux' },
+                { text: "Fine, élancée, ossature étroite et traits fins", type: 'Nerveux' },
+            ]},
+            { id: 2, text: "Votre appétit est :", options: [
+                { text: "Régulier mais lent, vous aimez prendre votre temps", type: 'Lymphatique' },
+                { text: "Bon et gourmand, vous mangez avec plaisir et convivialité", type: 'Sanguin' },
+                { text: "Fort et impérieux, vous avez besoin de manger à heures fixes", type: 'Bilieux' },
+                { text: "Irrégulier ou capricieux, vous oubliez parfois de manger", type: 'Nerveux' },
+            ]},
+            { id: 3, text: "Votre sommeil est :", options: [
+                { text: "Profond, long et lourd, difficile de se lever", type: 'Lymphatique' },
+                { text: "Récupérateur et paisible, vous vous réveillez en forme", type: 'Sanguin' },
+                { text: "Court mais intense, vous êtes vite opérationnel", type: 'Bilieux' },
+                { text: "Léger, fragile, avec des difficultés d'endormissement", type: 'Nerveux' },
+            ]},
+            { id: 4, text: "Face au stress, vous réagissez par :", options: [
+                { text: "Le calme, le retrait ou une certaine passivité", type: 'Lymphatique' },
+                { text: "L'optimisme, vous relativisez vite", type: 'Sanguin' },
+                { text: "La colère, l'action immédiate ou l'impatience", type: 'Bilieux' },
+                { text: "L'anxiété, l'agitation mentale ou l'inquiétude", type: 'Nerveux' },
+            ]},
+            { id: 5, text: "Votre peau est plutôt :", options: [
+                { text: "Fraîche, pâle, parfois un peu grasse", type: 'Lymphatique' },
+                { text: "Chaude, rosée, bien irriguée", type: 'Sanguin' },
+                { text: "Chaude, mate ou jaunâtre, tendance aux imperfections", type: 'Bilieux' },
+                { text: "Sèche, froide, fine et réactive", type: 'Nerveux' },
+            ]},
+            { id: 6, text: "Votre rythme de travail est :", options: [
+                { text: "Lent, constant et méthodique", type: 'Lymphatique' },
+                { text: "Entraînant, vous aimez varier les plaisirs", type: 'Sanguin' },
+                { text: "Rapide, efficace et orienté vers les résultats", type: 'Bilieux' },
+                { text: "Par à-coups, avec des pics de créativité intense", type: 'Nerveux' },
+            ]},
+            { id: 7, text: "Votre sociabilité est :", options: [
+                { text: "Réservée, vous appréciez le calme et la solitude", type: 'Lymphatique' },
+                { text: "Très développée, vous êtes le moteur du groupe", type: 'Sanguin' },
+                { text: "Directif, vous aimez organiser et diriger", type: 'Bilieux' },
+                { text: "Sélective, vous préférez les échanges intellectuels profonds", type: 'Nerveux' },
+            ]},
+            { id: 8, text: "Votre digestion est :", options: [
+                { text: "Lente, avec une sensation de lourdeur après les repas", type: 'Lymphatique' },
+                { text: "Facile et robuste, peu de problèmes digestifs", type: 'Sanguin' },
+                { text: "Rapide, avec parfois des brûlures d'estomac", type: 'Bilieux' },
+                { text: "Sensible, liée à votre état émotionnel", type: 'Nerveux' },
+            ]},
+            { id: 9, text: "Vos mains sont généralement :", options: [
+                { text: "Moites et froides", type: 'Lymphatique' },
+                { text: "Chaudes et humides", type: 'Sanguin' },
+                { text: "Chaudes et sèches", type: 'Bilieux' },
+                { text: "Froides et sèches", type: 'Nerveux' },
+            ]},
+            { id: 10, text: "Votre mémoire est :", options: [
+                { text: "Auditive et lente à fixer, mais durable", type: 'Lymphatique' },
+                { text: "Globale, vous retenez l'essentiel facilement", type: 'Sanguin' },
+                { text: "Sélective et précise sur les faits utiles", type: 'Bilieux' },
+                { text: "Visuelle, rapide mais parfois volatile", type: 'Nerveux' },
+            ]},
+            { id: 11, text: "Votre sport idéal :", options: [
+                { text: "Natation, marche tranquille ou aquagym", type: 'Lymphatique' },
+                { text: "Sports d'équipe, danse ou fitness", type: 'Sanguin' },
+                { text: "Compétition, arts martiaux ou musculation", type: 'Bilieux' },
+                { text: "Yoga, Pilates ou étirements", type: 'Nerveux' },
+            ]},
+            { id: 12, text: "Votre principale qualité :", options: [
+                { text: "La patience et la bienveillance", type: 'Lymphatique' },
+                { text: "La joie de vivre et l'enthousiasme", type: 'Sanguin' },
+                { text: "La volonté et la détermination", type: 'Bilieux' },
+                { text: "La créativité et l'intuition", type: 'Nerveux' },
+            ]}
+        ];
+
+        // --- Informations Tempéraments & Plantes ---
+        const TEMPERAMENT_INFO = {
+            Lymphatique: {
+                title: "Lymphatique", element: "Eau", icon: "droplets", color: "bg-blue-50 border-blue-200 text-blue-800",
+                description: "Vous êtes d'un naturel calme, posé et réfléchi. Votre métabolisme est plutôt lent, ce qui demande une attention particulière à l'élimination des toxines et à la circulation des liquides.",
+                details: {
+                    alimentation: "Privilégiez les aliments chauds, secs et épicés (gingembre, poivre). Évitez les laitages et les sucres qui favorisent l'humidité.",
+                    sommeil: "Besoin de sommeil régulier. Évitez les grasses matinées qui augmentent la sensation de lourdeur.",
+                    mental: "Cultivez l'enthousiasme. Entourez-vous de personnes dynamiques pour stimuler votre feu intérieur.",
+                    sport: "Natation, aquagym, marche rapide. Tout ce qui favorise le retour lymphatique."
+                },
+                plantes: [
+                    { name: "Piloselle", utility: "Drainage rénal et élimination des œdèmes." },
+                    { name: "Frêne", utility: "Favorise l'élimination de l'eau et des toxines." },
+                    { name: "Reine des prés", utility: "Drainage lymphatique et action anti-inflammatoire." },
+                    { name: "Cassis", utility: "Tonique général et soutien de l'élimination." }
+                ]
+            },
+            Sanguin: {
+                title: "Sanguin", element: "Air", icon: "wind", color: "bg-rose-50 border-rose-200 text-rose-800",
+                description: "Vous êtes une personne chaleureuse, communicative et pleine de vie. Votre énergie est tournée vers l'extérieur. Vous devez veiller à ne pas surcharger votre système circulatoire.",
+                details: {
+                    alimentation: "Évitez les excès de viande rouge et de graisses saturées. Privilégiez les végétaux frais et les aliments amers.",
+                    sommeil: "Sommeil réparateur nécessaire. Veillez à la fraîcheur de votre chambre.",
+                    mental: "Apprenez la modération. Pratiquez la respiration consciente pour calmer votre feu émotionnel.",
+                    sport: "Sports collectifs, danse, cardio modéré. Besoin de mouvement et de convivialité."
+                },
+                plantes: [
+                    { name: "Aubépine", utility: "Régulation du rythme cardiaque et de la tension." },
+                    { name: "Vigne rouge", utility: "Soutien de la circulation veineuse et capillaire." },
+                    { name: "Artichaut", utility: "Drainage hépatique et régulation du cholestérol." },
+                    { name: "Mélisse", utility: "Apaisement digestif et nerveux." }
+                ]
+            },
+            Bilieux: {
+                title: "Bilieux", element: "Feu", icon: "zap", color: "bg-amber-50 border-amber-200 text-amber-800",
+                description: "Vous êtes déterminé, efficace et orienté vers l'action. Votre volonté est votre moteur. Vous devez veiller à ne pas 'brûler' vos réserves par un excès de tension.",
+                details: {
+                    alimentation: "Évitez les excitants (café, alcool). Privilégiez les aliments rafraîchissants et les cuissons douces.",
+                    sommeil: "Sommeil souvent court. Déconnectez des écrans tôt pour calmer le mental.",
+                    mental: "Pratiquez le lâcher-prise. La méditation vous aide à canaliser votre impatience naturelle.",
+                    sport: "Sports d'endurance, arts martiaux, natation. Activités qui demandent discipline et focus."
+                },
+                plantes: [
+                    { name: "Chardon-marie", utility: "Protection et régénération des cellules du foie." },
+                    { name: "Desmodium", utility: "Soutien majeur de la fonction hépatique." },
+                    { name: "Radis noir", utility: "Détoxication biliaire et digestive." },
+                    { name: "Romarin", utility: "Tonique hépatique et aide à la digestion difficile." }
+                ]
+            },
+            Nerveux: {
+                title: "Nerveux", element: "Terre", icon: "mountain", color: "bg-emerald-50 border-emerald-200 text-emerald-800",
+                description: "Vous êtes cérébral, créatif et intuitif. Votre sensibilité est votre force. Vous devez veiller à protéger votre système nerveux et à maintenir votre ancrage.",
+                details: {
+                    alimentation: "Aliments nourrissants et réchauffants. Privilégiez les bons gras (Oméga-3) pour nourrir votre cerveau.",
+                    sommeil: "Sommeil souvent fragile. Créez un rituel de coucher apaisant et régulier.",
+                    mental: "Besoin de sécurité. Pratiquez l'ancrage (marche en forêt) pour calmer l'agitation mentale.",
+                    sport: "Yoga, Pilates, marche lente. Activités douces qui favorisent la conscience corporelle."
+                },
+                plantes: [
+                    { name: "Passiflore", utility: "Réduction de l'anxiété et aide à l'endormissement." },
+                    { name: "Valériane", utility: "Détente musculaire et nerveuse profonde." },
+                    { name: "Eschscholtzia", utility: "Amélioration de la qualité du sommeil réparateur." },
+                    { name: "Rhodiola", utility: "Plante adaptogène pour la résistance au stress." }
+                ]
+            }
+        };
+
+        // --- Application Principale ---
+        function App() {
+            const [activeTab, setActiveTab] = useState('home');
+            const [quizState, setQuizState] = useState({ currentStep: 0, answers: [], result: null });
+            const [copySuccess, setCopySuccess] = useState(false);
+
+            const handleAnswer = (type) => {
+                const newAnswers = [...quizState.answers, type];
+                if (quizState.currentStep < 11) {
+                    setQuizState({ ...quizState, currentStep: quizState.currentStep + 1, answers: newAnswers });
+                } else {
+                    const counts = newAnswers.reduce((acc, curr) => { acc[curr] = (acc[curr] || 0) + 1; return acc; }, {});
+                    const winner = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+                    setQuizState({ ...quizState, result: winner });
+                }
+            };
+
+            const resetQuiz = () => setQuizState({ currentStep: 0, answers: [], result: null });
+
+            const shareProfile = () => {
+                const info = TEMPERAMENT_INFO[quizState.result];
+                const text = `Mon profil Naturopulse : ${info.title}\nÉlément : ${info.element}\n\n${info.description}\n\nConseils clés :\n- Alimentation : ${info.details.alimentation}\n- Sommeil : ${info.details.sommeil}\n- Sport : ${info.details.sport}\n\nPlantes recommandées : ${info.plantes.map(p => p.name).join(', ')}`;
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    setCopySuccess(true);
+                    setTimeout(() => setCopySuccess(false), 2000);
+                });
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col">
+                    {/* Navigation */}
+                    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-sage/20 px-6 py-3 flex justify-around items-center z-40 md:top-0 md:bottom-auto md:bg-cream/80 md:backdrop-blur-md">
+                        <button onClick={() => setActiveTab('home')} className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'home' ? 'text-terracotta' : 'text-sage'}`}>
+                            <Icon name="home" /><span className="text-[10px] uppercase font-bold">Accueil</span>
+                        </button>
+                        <button onClick={() => setActiveTab('quiz')} className={`flex flex-col items-center gap-1 transition-colors ${activeTab === 'quiz' ? 'text-terracotta' : 'text-sage'}`}>
+                            <Icon name="clipboard-check" /><span className="text-[10px] uppercase font-bold">Test</span>
+                        </button>
+                        <a href="https://www.youtube.com/@votre-chaine" target="_blank" className="flex flex-col items-center gap-1 text-sage hover:text-terracotta transition-colors">
+                            <Icon name="youtube" /><span className="text-[10px] uppercase font-bold">YouTube</span>
+                        </a>
+                    </nav>
+
+                    <main className="flex-grow pt-8 md:pt-24 px-4 max-w-4xl mx-auto w-full mb-24">
+                        {activeTab === 'home' && (
+                            <div className="animate-in space-y-12">
+                                <header className="text-center space-y-4">
+                                    <div className="inline-flex p-3 bg-sage/10 rounded-full text-sage"><Icon name="leaf" size={32} /></div>
+                                    <h1 className="text-5xl md:text-7xl font-serif text-stone-900">Naturopulse</h1>
+                                    <p className="text-lg text-stone-600 italic">Retrouvez votre équilibre naturel</p>
+                                </header>
+                                <div className="grid md:grid-cols-2 gap-8">
+                                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-sage/10 space-y-4">
+                                        <h2 className="text-2xl font-serif text-terracotta">Votre tempérament</h2>
+                                        <p className="text-stone-600 leading-relaxed">Découvrez votre profil naturopathique en 12 questions pour adapter votre hygiène de vie.</p>
+                                        <button onClick={() => setActiveTab('quiz')} className="w-full bg-sage hover:bg-sage-light text-white font-bold py-4 rounded-2xl transition-all btn-hover flex items-center justify-center gap-2">Commencer le test <Icon name="chevron-right" size={18}/></button>
+                                    </div>
+                                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-sage/10 space-y-4">
+                                        <h2 className="text-2xl font-serif text-terracotta">Ma chaîne YouTube</h2>
+                                        <p className="text-stone-600 leading-relaxed">Retrouvez mes conseils en vidéo pour approfondir votre connaissance de la naturopathie.</p>
+                                        <a href="https://www.youtube.com/@votre-chaine" target="_blank" className="w-full border-2 border-sage text-sage hover:bg-sage hover:text-white font-bold py-4 rounded-2xl transition-all btn-hover flex items-center justify-center gap-2">Voir les vidéos <Icon name="external-link" size={18}/></a>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'quiz' && (
+                            <div className="max-w-2xl mx-auto animate-in">
+                                {!quizState.result ? (
+                                    <div className="bg-white p-8 md:p-12 rounded-3xl shadow-xl border border-sage/10">
+                                        <div className="mb-6 flex justify-between items-center text-xs font-bold text-sage uppercase tracking-widest">
+                                            <span>Question {quizState.currentStep + 1} / 12</span>
+                                            <div className="w-24 h-1 bg-sage/10 rounded-full overflow-hidden">
+                                                <div className="h-full bg-sage transition-all" style={{width: `${((quizState.currentStep+1)/12)*100}%`}}></div>
+                                            </div>
+                                        </div>
+                                        <h2 className="text-2xl md:text-3xl font-serif mb-8 text-stone-800 leading-tight">{QUESTIONS[quizState.currentStep].text}</h2>
+                                        <div className="grid gap-4">
+                                            {QUESTIONS[quizState.currentStep].options.map((opt, i) => (
+                                                <button key={i} onClick={() => handleAnswer(opt.type)} className="text-left p-5 rounded-2xl border-2 border-sage/10 hover:border-terracotta hover:bg-terracotta/5 transition-all font-medium text-stone-700">{opt.text}</button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-8 animate-in">
+                                        <div className={`p-8 md:p-12 rounded-3xl border-2 shadow-sm relative overflow-hidden ${TEMPERAMENT_INFO[quizState.result].color}`}>
+                                            <div className="flex items-center gap-4 mb-6">
+                                                <Icon name={TEMPERAMENT_INFO[quizState.result].icon} size={48} />
+                                                <div>
+                                                    <h2 className="text-4xl md:text-5xl font-serif">{TEMPERAMENT_INFO[quizState.result].title}</h2>
+                                                    <p className="text-lg font-medium italic opacity-80">Élément : {TEMPERAMENT_INFO[quizState.result].element}</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-lg leading-relaxed mb-8 border-b border-current pb-8">{TEMPERAMENT_INFO[quizState.result].description}</p>
+                                            
+                                            {/* Dashboard Section */}
+                                            <div className="grid md:grid-cols-2 gap-6 mb-10">
+                                                <div className="bg-white/40 p-5 rounded-2xl">
+                                                    <h3 className="font-serif text-xl mb-2 flex items-center gap-2"><Icon name="apple" size={20}/> Alimentation</h3>
+                                                    <p className="text-sm leading-relaxed">{TEMPERAMENT_INFO[quizState.result].details.alimentation}</p>
+                                                </div>
+                                                <div className="bg-white/40 p-5 rounded-2xl">
+                                                    <h3 className="font-serif text-xl mb-2 flex items-center gap-2"><Icon name="moon" size={20}/> Sommeil</h3>
+                                                    <p className="text-sm leading-relaxed">{TEMPERAMENT_INFO[quizState.result].details.sommeil}</p>
+                                                </div>
+                                                <div className="bg-white/40 p-5 rounded-2xl">
+                                                    <h3 className="font-serif text-xl mb-2 flex items-center gap-2"><Icon name="brain" size={20}/> Mental</h3>
+                                                    <p className="text-sm leading-relaxed">{TEMPERAMENT_INFO[quizState.result].details.mental}</p>
+                                                </div>
+                                                <div className="bg-white/40 p-5 rounded-2xl">
+                                                    <h3 className="font-serif text-xl mb-2 flex items-center gap-2"><Icon name="activity" size={20}/> Sport</h3>
+                                                    <p className="text-sm leading-relaxed">{TEMPERAMENT_INFO[quizState.result].details.sport}</p>
+                                                </div>
+                                            </div>
+
+                                            {/* Section Plantes Médicinales */}
+                                            <div className="bg-white/60 p-6 md:p-8 rounded-3xl border border-current/20 mb-8">
+                                                <h3 className="text-2xl font-serif mb-6 flex items-center gap-3 text-stone-800">
+                                                    <Icon name="sprout" size={28} className="text-sage"/> Mes Plantes Médicinales
+                                                </h3>
+                                                <div className="grid gap-4">
+                                                    {TEMPERAMENT_INFO[quizState.result].plantes.map((plante, idx) => (
+                                                        <div key={idx} className="flex gap-4 items-start border-b border-current/10 pb-4 last:border-0 last:pb-0">
+                                                            <div className="mt-1 text-sage"><Icon name="check-circle" size={18}/></div>
+                                                            <div>
+                                                                <h4 className="font-bold text-stone-800">{plante.name}</h4>
+                                                                <p className="text-sm text-stone-600">{plante.utility}</p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <p className="mt-6 text-[10px] italic opacity-70">Inspiré de l'approche du Dr Paul Dupont. Demandez toujours l'avis d'un professionnel avant toute cure.</p>
+                                            </div>
+
+                                            <div className="flex flex-wrap gap-4">
+                                                <button onClick={shareProfile} className="bg-terracotta text-white px-8 py-4 rounded-2xl font-bold hover:bg-terracotta-light transition-all btn-hover flex items-center gap-2">
+                                                    {copySuccess ? "Copié !" : "Partager mon profil"} <Icon name={copySuccess ? "check" : "share-2"} size={20}/>
+                                                </button>
+                                                <button onClick={resetQuiz} className="bg-white/60 text-stone-700 px-8 py-4 rounded-2xl font-bold hover:bg-white transition-all btn-hover">Refaire le test</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </main>
+
+                    <footer className="bg-stone-900 text-stone-500 py-12 px-6 text-center text-xs mt-auto">
+                        <div className="max-w-4xl mx-auto">
+                            <p className="mb-6 leading-relaxed">Naturopulse est un outil d'accompagnement bien-être. Les conseils prodigués ne remplacent en aucun cas un avis médical professionnel. Consultez toujours votre médecin.</p>
+                            <div className="flex justify-center gap-6 uppercase tracking-[0.2em] font-bold">
+                                <a href="#" className="hover:text-white transition-colors">Mentions Légales</a>
+                                <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
+                                <a href="https://www.youtube.com/@votre-chaine" target="_blank" className="hover:text-white transition-colors">YouTube</a>
+                            </div>
+                            <p className="mt-8 opacity-50">&copy; 2026 Naturopulse. Tous droits réservés.</p>
+                        </div>
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
